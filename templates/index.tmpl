@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<!-- Required meta tags -->
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<!-- Bootstrap CSS -->
+	<link href="/assets/bootstrap/css/bootstrap.css" rel="stylesheet">
+
+	<title>
+		{{ .title }}
+	</title>
+</head>
+
+<body class="bg-dark">
+
+	<script src="/assets/bootstrap/js/bootstrap.bundle.js"></script>
+
+	<div class="container-xxl">
+
+		<h1 class="text-light">
+			{{ .title }}
+		</h1>
+
+
+		<div class="table-responsive">
+			<table class="table table-sm table-hover table-dark table-striped">
+				<caption>{{ .lines}} lines parsed</caption>
+				<thead class="">
+					<tr>
+						<th scope="col">#</th>
+						<th scope="col">Time</th>
+						<th scope="col">IP address</th>
+						<th scope="col">From</th>
+						<th scope="col">To</th>
+						<th scope="col">Subject</th>
+						<th scope="col">Action</th>
+						<th scope="col">Score</th>
+						<th class="text-end" scope="col">Size</th>
+					</tr>
+				</thead>
+				<tbody>
+					{{range .items}}
+					<tr>
+						<td class="text-justify small">{{.No}}</td>
+						<td class="small">{{.When}}</td>
+						<td class="small">{{.IP}}</td>
+						<td style="word-break: break-word; min-width: 200px;">{{.From}}</td>
+						<td style="word-break: break-word; min-width: 200px;">{{.To}}</td>
+						<td style="word-break: break-word; min-width: 300px;">{{.Subject}}</td>
+						<td>
+							{{ if eq .Status "SPAM" }}
+							<span class="badge bg-danger">{{.Status}}</span>
+							<span class="small">{{.Action}}</span>
+							{{ else }}
+							<span class="badge bg-success">{{.Status}}</span>
+							<span class="small">{{.Action}}</span>
+							{{ end }}
+						</td>
+						<td style="max-width: 250px;">
+							{{ if eq .Status "SPAM" }}
+							<span class="badge bg-danger">{{.Score}}</span>
+							{{ else }}
+							<span class="badge bg-primary">{{.Score}}</span>
+							{{ end }}
+							<p class="small"><code>{{.Tests}}</code></p>
+						</td>
+						<td class="text-end text-nowrap small">{{.Size}}</td>
+					</tr>
+					{{end}}
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+</body>
+
+</html>
