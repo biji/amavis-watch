@@ -26,7 +26,7 @@ rsync -avP ./amavis-watch htpasswd.txt templates assets user@your-mail-server.co
 ./amavis-watch /var/log/mail.log.1 /var/log/mail.log
 ```
 
-Open using browser: `http://your-mail-server.com/index`
+Open using browser: `http://your-mail-server.com:8080/index`
 
 Run in background:
 
