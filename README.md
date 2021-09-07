@@ -2,6 +2,9 @@
 
 Watch postfix log files containing amavis scanning result
 
+![image](https://user-images.githubusercontent.com/665559/132325746-c8b20ace-2f2d-4843-bf4a-074e34f0292d.png)
+
+
 # Install
 
 Compile 
@@ -11,7 +14,7 @@ go mod download
 make
 ```
 
-Rsync `amavis-watch` `htpasswd.txt` `assets` `templates` to server
+Rsync required files to server
 
 ```bash
 rsync -avP ./amavis-watch htpasswd.txt templates assets user@your-mail-server.com:
