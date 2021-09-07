@@ -4,6 +4,8 @@ Watch postfix log files containing amavis scanning result
 
 # Install
 
+Compile 
+
 ```bash
 go mod download
 make
@@ -27,6 +29,15 @@ Run in background:
 
 ```bash
 nohup ./amavis-watch /var/log/mail.log.1 /var/log/mail.log &
+```
+
+Optional parameters:
+
+```
+./amavis-watch [-cred FILENAME] [-prod] file.log.1 file.log
+
+-cred FILENAME      specify htpasswd credential file
+-prod               Run in production mode
 ```
 
 # Change password
