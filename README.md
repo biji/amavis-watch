@@ -41,8 +41,12 @@ Optional parameters:
 ```
 ./amavis-watch [-cred FILENAME] [-prod] file.log.1 file.log
 
--cred FILENAME      specify htpasswd credential file
--prod               Run in production mode
+  -cred string
+    	htpasswd credential file (default "./htpasswd.txt")
+  -log string
+    	Redirect log to this file
+  -prod
+    	Run in production mode
 ```
 
 # Change password

@@ -4,8 +4,8 @@ import (
 	"bufio"
 	"bytes"
 	"flag"
-	"fmt"
 	"io"
+	"log"
 	"mime"
 	"net/http"
 	"os"
@@ -16,6 +16,7 @@ import (
 	auth "github.com/abbot/go-http-auth"
 	"github.com/dustin/go-humanize"
 	"github.com/gin-gonic/gin"
+	"github.com/kardianos/osext"
 	"golang.org/x/net/html/charset"
 )
 
@@ -59,7 +60,7 @@ func parseMaillog(c *gin.Context) {
 	for _, aFile := range files {
 		f, err := os.Open(aFile)
 		if err != nil {
-			fmt.Println("There has been an error!: ", err)
+			log.Print("There has been an error!: ", err)
 		}
 		defer f.Close()
 
@@ -96,14 +97,14 @@ func parseMaillog(c *gin.Context) {
 					items = append([]Email{Email{no, matches[1], matches[3], matches[4], matches[5], matches[6], matches[7], rcpt, matches[9], matches[11], matches[12], humanize.Bytes(size), subject, matches[15], tests}}, items...)
 					no++
 				} else {
-					fmt.Println(request)
-					fmt.Printf("Not parsed: %v\n", request)
+					// fmt.Println(request)
+					log.Printf("Not parsed: %v", request)
 				}
 			}
 
 		}
 		if err := scanner.Err(); err != nil {
-			fmt.Printf("Error: %v\n", err)
+			log.Printf("Error: %v", err)
 		}
 	}
 
@@ -132,17 +133,35 @@ func BasicAuth(a *auth.BasicAuth) gin.HandlerFunc {
 }
 
 func main() {
-	cred := flag.String("cred", "htpasswd.txt", "htpasswd credential file")
-	release := flag.Bool("prod", true, "Run in production mode")
+
+	folderPath, err := osext.ExecutableFolder()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	cred := flag.String("cred", "./htpasswd.txt", "htpasswd credential file")
+	logOutput := flag.String("log", "", "Redirect log to this file")
+	release := flag.Bool("prod", false, "Run in production mode")
 	flag.Parse()
 
 	if *release {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
+	if strings.Compare(*logOutput, "") != 0 {
+		gin.DisableConsoleColor()
+		f, err := os.OpenFile(*logOutput, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0664)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer f.Close()
+		gin.DefaultWriter = io.MultiWriter(f)
+		log.SetOutput(f)
+	}
+
 	r := gin.Default()
-	r.LoadHTMLGlob("templates/*")
-	r.Static("/assets", "./assets")
+	r.LoadHTMLGlob(folderPath + "/templates/*")
+	r.Static("/assets", folderPath+"/assets")
 
 	htpasswd := auth.HtpasswdFileProvider(*cred)
 	authenticator := auth.NewBasicAuthenticator("Amavis Watch", htpasswd)
