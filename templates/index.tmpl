@@ -47,8 +47,11 @@
 						<td class="text-justify small">{{.No}}</td>
 						<td class="small">{{.When}}</td>
 						<td class="small">{{.IP}}</td>
-						<td style="word-break: break-word; min-width: 200px;">{{.From}}</td>
-						<td style="word-break: break-word; min-width: 200px;">{{.To}}</td>
+						<td class="small" style="word-break: break-word; min-width: 200px;">
+							{{.Sender}} <code>{{.SenderMail}}</code>
+							<code>({{.From}})</code>
+						</td>
+						<td style="word-break: break-word; min-width: 200px;"><code>{{.To}}</code></td>
 						<td style="word-break: break-word; min-width: 300px;">{{.Subject}}</td>
 						<td>
 							{{ if eq .Status "SPAM" }}

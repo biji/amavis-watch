@@ -21,21 +21,22 @@ import (
 )
 
 type Email struct {
-	No      int
-	When    string
-	Action  string
-	Status  string
-	Flow    string
-	IP      string
-	From    string
-	To      string
-	Queueid string
-	Mid     string
-	Score   string
-	Size    string
-	Subject string
-	Sender  string
-	Tests   string
+	No         int
+	When       string
+	Action     string
+	Status     string
+	Flow       string
+	IP         string
+	From       string
+	To         string
+	Queueid    string
+	Mid        string
+	Score      string
+	Size       string
+	Subject    string
+	Sender     string
+	SenderMail string
+	Tests      string
 }
 
 func parseMaillog(c *gin.Context) {
@@ -81,20 +82,46 @@ func parseMaillog(c *gin.Context) {
 					size, _ := strconv.ParseUint(matches[13], 10, 64)
 					tests := strings.ReplaceAll(matches[16], ",", " ")
 
+					// subject
 					subjectpart := strings.Split(matches[14], "(raw: ")
 					subject := subjectpart[0]
 
 					if len(subjectpart) > 1 {
 						subjectraw := strings.TrimSuffix(subjectpart[1], ")")
-
-						subject, _ = dec.DecodeHeader(subjectraw)
+						subject, err = dec.DecodeHeader(subjectraw)
 						if err != nil {
+							log.Print("error decoding: " + subjectraw)
 							subject = subjectpart[0]
 						}
 					}
 
+					// sender
+					r1 := regexp.MustCompile(` \(dkim:.*?\)$`)
+					sender := r1.ReplaceAllString(matches[15], "")
+					senderpart := strings.Split(sender, "(raw:_")
+					sender = senderpart[0]
+					if len(senderpart) > 1 {
+						senderraw := strings.TrimSuffix(senderpart[1], ")")
+						sender, err = dec.DecodeHeader(senderraw)
+						if err != nil {
+							log.Print("error decoding: " + senderraw)
+							sender = senderpart[0]
+						}
+					}
+					r2 := regexp.MustCompile(`"?(.*?)"?_<(.*?)>`)
+					senderMatch := r2.FindStringSubmatch(sender)
+					senderMail := ""
+					if len(senderMatch) >= 3 {
+						sender = senderMatch[1]
+						senderMail = senderMatch[2]
+					} else {
+						senderMail = matches[7]
+						sender = ""
+					}
+					sender = strings.ReplaceAll(sender, "_", " ")
+
 					rcpt := strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(matches[8], ",", " "), "<", " "), ">", " ")
-					items = append([]Email{Email{no, matches[1], matches[3], matches[4], matches[5], matches[6], matches[7], rcpt, matches[9], matches[11], matches[12], humanize.Bytes(size), subject, matches[15], tests}}, items...)
+					items = append([]Email{Email{no, matches[1], matches[3], matches[4], matches[5], matches[6], matches[7], rcpt, matches[9], matches[11], matches[12], humanize.Bytes(size), subject, sender, senderMail, tests}}, items...)
 					no++
 				} else {
 					// fmt.Println(request)
