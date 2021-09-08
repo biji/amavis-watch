@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
+	"io"
 	"mime"
 	"net/http"
 	"os"
@@ -15,6 +16,7 @@ import (
 	auth "github.com/abbot/go-http-auth"
 	"github.com/dustin/go-humanize"
 	"github.com/gin-gonic/gin"
+	"golang.org/x/net/html/charset"
 )
 
 type Email struct {
@@ -39,6 +41,14 @@ func parseMaillog(c *gin.Context) {
 	items := []Email{}
 	no := 1
 	var lines int64 = 0
+
+	//
+	CharsetReader := func(label string, input io.Reader) (io.Reader, error) {
+		label = strings.Replace(label, "windows-", "cp", -1)
+		encoding, _ := charset.Lookup(label)
+		return encoding.NewDecoder().Reader(input), nil
+	}
+	dec := mime.WordDecoder{CharsetReader: CharsetReader}
 
 	// files := os.Args[1:]
 	files := flag.Args()
@@ -75,7 +85,7 @@ func parseMaillog(c *gin.Context) {
 
 					if len(subjectpart) > 1 {
 						subjectraw := strings.TrimSuffix(subjectpart[1], ")")
-						dec := new(mime.WordDecoder)
+
 						subject, _ = dec.DecodeHeader(subjectraw)
 						if err != nil {
 							subject = subjectpart[0]
