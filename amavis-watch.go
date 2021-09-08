@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
+	"mime"
 	"net/http"
 	"os"
 	"regexp"
@@ -68,10 +69,20 @@ func parseMaillog(c *gin.Context) {
 				if len(matches) >= 16 {
 					size, _ := strconv.ParseUint(matches[13], 10, 64)
 					tests := strings.ReplaceAll(matches[16], ",", " ")
-					subjectpart := strings.Split(matches[14], "(raw:")
-					subject := subjectpart[0]
-					rcpt := strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(matches[8], ",", " "), "<", " "), ">", " ")
 
+					subjectpart := strings.Split(matches[14], "(raw: ")
+					subject := subjectpart[0]
+
+					if len(subjectpart) > 1 {
+						subjectraw := strings.TrimSuffix(subjectpart[1], ")")
+						dec := new(mime.WordDecoder)
+						subject, _ = dec.DecodeHeader(subjectraw)
+						if err != nil {
+							subject = subjectpart[0]
+						}
+					}
+
+					rcpt := strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(matches[8], ",", " "), "<", " "), ">", " ")
 					items = append([]Email{Email{no, matches[1], matches[3], matches[4], matches[5], matches[6], matches[7], rcpt, matches[9], matches[11], matches[12], humanize.Bytes(size), subject, matches[15], tests}}, items...)
 					no++
 				} else {

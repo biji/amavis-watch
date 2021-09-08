@@ -7,14 +7,14 @@ Watch postfix log files containing amavis scanning result
 
 # Install
 
-Compile 
+Compile:
 
 ```bash
 go mod download
 make
 ```
 
-Rsync required files to server
+Rsync required files to server:
 
 ```bash
 rsync -avP ./amavis-watch htpasswd.txt templates assets user@your-mail-server.com:
@@ -28,7 +28,9 @@ rsync -avP ./amavis-watch htpasswd.txt templates assets user@your-mail-server.co
 
 Open using browser: `http://your-mail-server.com:8080/index`
 
-Run in background:
+For `https`, you can use `Caddy`
+
+To run in background:
 
 ```bash
 nohup ./amavis-watch /var/log/mail.log.1 /var/log/mail.log &
@@ -54,3 +56,4 @@ htpasswd htpasswd.txt amavis
 # create new user
 htpasswd htpasswd.txt username
 ```
+
