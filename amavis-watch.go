@@ -115,7 +115,7 @@ func parseMaillog(c *gin.Context) {
 						sender = senderMatch[1]
 						senderMail = senderMatch[2]
 					} else {
-						senderMail = matches[7]
+						senderMail = strings.Trim(sender, " _<>")
 						sender = ""
 					}
 					sender = strings.ReplaceAll(sender, "_", " ")

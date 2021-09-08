@@ -20,11 +20,15 @@
 
 	<div class="container-xxl">
 
-		<h1 class="text-light">
-			{{ .title }}
-		</h1>
-
-
+		<nav class="navbar navbar-dark bg-dark">
+			<div class="container-fluid">
+				<a class="navbar-brand">{{ .title }}</a>
+				<form class="d-flex">
+					<button class="btn btn-outline-success" type="submit" onclick="location.reload();return false;">Refresh</button>
+				</form>
+			</div>
+		</nav>
+	
 		<div class="table-responsive">
 			<table class="table table-sm table-hover table-dark table-striped">
 				<caption>{{ .lines}} lines parsed</caption>
@@ -51,7 +55,7 @@
 							{{.Sender}} <code>{{.SenderMail}}</code>
 							<code>({{.From}})</code>
 						</td>
-						<td style="word-break: break-word; min-width: 200px;"><code>{{.To}}</code></td>
+						<td class="small" style="word-break: break-word; min-width: 200px;"><code>{{.To}}</code></td>
 						<td style="word-break: break-word; min-width: 300px;">{{.Subject}}</td>
 						<td>
 							{{ if eq .Status "SPAM" }}
