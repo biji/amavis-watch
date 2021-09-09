@@ -20,6 +20,14 @@ Rsync required files to server:
 rsync -avP ./amavis-watch htpasswd.txt templates assets user@your-mail-server.com:
 ```
 
+## Amavis config
+
+Amavis log must be set to verbose, edit `/etc/amavis/conf.d/50-user` and add:
+
+```
+$log_templ = $log_verbose_templ;
+```
+
 # Run
 
 ```bash
@@ -49,7 +57,7 @@ Optional parameters:
     	Run in production mode
 ```
 
-# Change password
+## Change password
 
 Default username is `amavis` with password `watch`
 
