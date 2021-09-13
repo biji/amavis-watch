@@ -22,13 +22,21 @@
 
 		<nav class="navbar navbar-dark bg-dark">
 			<div class="container-fluid">
-				<a class="navbar-brand">{{ .title }}</a>
+				<a class="navbar-brand">
+					<svg xmlns="http://www.w3.org/2000/svg" width="32" height="24" fill="currentColor"
+						class="bi bi-sunglasses d-inline-block align-text-top" viewBox="0 0 16 16">
+						<path
+							d="M3 5a2 2 0 0 0-2 2v.5H.5a.5.5 0 0 0 0 1H1V9a2 2 0 0 0 2 2h1a3 3 0 0 0 3-3 1 1 0 1 1 2 0 3 3 0 0 0 3 3h1a2 2 0 0 0 2-2v-.5h.5a.5.5 0 0 0 0-1H15V7a2 2 0 0 0-2-2h-2a2 2 0 0 0-1.888 1.338A1.99 1.99 0 0 0 8 6a1.99 1.99 0 0 0-1.112.338A2 2 0 0 0 5 5H3zm0 1h.941c.264 0 .348.356.112.474l-.457.228a2 2 0 0 0-.894.894l-.228.457C2.356 8.289 2 8.205 2 7.94V7a1 1 0 0 1 1-1z" />
+					</svg>
+					{{ .title }}
+				</a>
 				<form class="d-flex">
-					<button class="btn btn-outline-success" type="submit" onclick="location.reload();return false;">Refresh</button>
+					<button class="btn btn-outline-success" type="submit"
+						onclick="location.reload();return false;">Refresh</button>
 				</form>
 			</div>
 		</nav>
-	
+
 		<div class="table-responsive">
 			<table class="table table-sm table-hover table-dark table-striped">
 				<caption>{{ .lines}} lines parsed</caption>
@@ -58,7 +66,7 @@
 						<td class="small" style="word-break: break-word; min-width: 200px;"><code>{{.To}}</code></td>
 						<td style="word-break: break-word; min-width: 300px;">{{.Subject}}</td>
 						<td>
-							{{ if eq .Status "SPAM" }}
+							{{ if eq .Action "Blocked" }}
 							<span class="badge bg-danger">{{.Status}}</span>
 							<span class="small">{{.Action}}</span>
 							{{ else }}
@@ -67,7 +75,7 @@
 							{{ end }}
 						</td>
 						<td style="max-width: 250px;">
-							{{ if eq .Status "SPAM" }}
+							{{ if eq .Action "Blocked" }}
 							<span class="badge bg-danger">{{.Score}}</span>
 							{{ else }}
 							<span class="badge bg-primary">{{.Score}}</span>

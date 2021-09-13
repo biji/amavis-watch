@@ -74,16 +74,34 @@ func parseMaillog(c *gin.Context) {
 				request := string(line)
 				// fmt.Println(request)
 
-				re := regexp.MustCompile(`(.*?\s+\d+ [\d:]+).*?\(([^\)]+)\) (Passed|Blocked) (.*?) {(.*?)}, .*?\[([^\s]+)\].*? [<]*([^\s>]*)[>] -> ([^\s]+), Queue-ID: ([^,]+)?, (Message-ID: [<]*([^\s>]*)[>],)?.*?Hits: ([^,]+), size: (\d+),.*?Subject: "(.*)", From: ([^,]+),.*?Tests: \[([^\s\]]*)\]?`)
-				matches := re.FindStringSubmatch(request)
+				re := regexp.MustCompile(`(?P<when>.*?\s+\d+ [\d:]+).*?\(([^\)]+)\) (?P<action>Passed|Blocked) (?P<status>.*?) {(?P<flow>.*?)}.*?\[(?P<ip>[^\s]+)\]:\d+.*? [<]*(?P<from>[^\s>]*)[>] -> (?P<to>[^\s]+),( quarantine: [^\s]+,)? Queue-ID: (?P<queueid>[^,]+)?,( Message-ID: [<]*(?P<mid>[^\s>]*)[>],)? .*Hits: (?P<score>[^,]+), size: (?P<size>\d+),.*?Subject: "(?P<subject>.*)", From: (?P<sender>[^,]+)(?P<rest>.*)`)
+				submatch := re.FindStringSubmatch(request)
 				// fmt.Printf("%q\n", matches)
 
-				if len(matches) >= 16 {
-					size, _ := strconv.ParseUint(matches[13], 10, 64)
-					tests := strings.ReplaceAll(matches[16], ",", " ")
+				if len(submatch) >= 16 {
+					matches := make(map[string]string)
+					for i, name := range re.SubexpNames() {
+						if i != 0 && name != "" {
+							matches[name] = submatch[i]
+						}
+					}
+
+					size, _ := strconv.ParseUint(matches["size"], 10, 64)
+
+					// tests
+					re1 := regexp.MustCompile(`Tests: \[(?P<tests>[^\s\]]*)\]?`)
+					match2 := re1.FindStringSubmatch(request)
+					tests := ""
+					if len(match2) > 1 {
+						tests = strings.ReplaceAll(match2[1], ",", " ")
+					}
+
+					// status
+					statuspart := strings.Split(matches["status"], " ")
+					status := statuspart[0]
 
 					// subject
-					subjectpart := strings.Split(matches[14], "(raw: ")
+					subjectpart := strings.Split(matches["subject"], "(raw: ")
 					subject := subjectpart[0]
 
 					if len(subjectpart) > 1 {
@@ -97,7 +115,7 @@ func parseMaillog(c *gin.Context) {
 
 					// sender
 					r1 := regexp.MustCompile(` \(dkim:.*?\)$`)
-					sender := r1.ReplaceAllString(matches[15], "")
+					sender := r1.ReplaceAllString(matches["sender"], "")
 					senderpart := strings.Split(sender, "(raw:_")
 					sender = senderpart[0]
 					if len(senderpart) > 1 {
@@ -120,8 +138,8 @@ func parseMaillog(c *gin.Context) {
 					}
 					sender = strings.ReplaceAll(sender, "_", " ")
 
-					rcpt := strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(matches[8], ",", " "), "<", " "), ">", " ")
-					items = append([]Email{Email{no, matches[1], matches[3], matches[4], matches[5], matches[6], matches[7], rcpt, matches[9], matches[11], matches[12], humanize.Bytes(size), subject, sender, senderMail, tests}}, items...)
+					rcpt := strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(matches["to"], ",", " "), "<", " "), ">", " ")
+					items = append([]Email{Email{no, matches["when"], matches["action"], status, matches["flow"], matches["ip"], matches["from"], rcpt, matches["queueid"], matches["mid"], matches["score"], humanize.Bytes(size), subject, sender, senderMail, tests}}, items...)
 					no++
 				} else {
 					// fmt.Println(request)
